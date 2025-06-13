@@ -6,8 +6,8 @@ from mcp import ClientSession
 from mcp.client.sse import sse_client
 import asyncio
 
-AUDIENCE = "https://mcp-server-flight-booking-service-906715771531.us-central1.run.app/"
-ENDPOINT = "https://mcp-server-flight-booking-service-906715771531.us-central1.run.app/sse"
+AUDIENCE = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/"
+ENDPOINT = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/sse"
 
 async def get_booking(booking_id: str)-> str:
     """
