@@ -20,9 +20,11 @@ cd ~/adk-examples/ai-adk-nl2sql/
 adk web
 
 # Deploy to Cloud Run
+cd ~/adk-examples/ai-adk-nl2sql/
+
 gcloud run deploy adk-nl2sql-service \
 --source . \
 --region us-central1 \
 --project <Initiate> \
 --allow-unauthenticated \
---set-env-vars="GOOGLE_CLOUD_PROJECT=<Initiate>,GOOGLE_CLOUD_LOCATION=<Initiate>,GOOGLE_GENAI_USE_VERTEXAI=True"
+--set-env-vars="GOOGLE_CLOUD_PROJECT=<Initiate>,GOOGLE_CLOUD_LOCATION=<Initiate>,GOOGLE_GENAI_USE_VERTEXAI=True,PROJECT =<Initiate>,DATASET=<Initiate>,BQ_LOCATION=US"
