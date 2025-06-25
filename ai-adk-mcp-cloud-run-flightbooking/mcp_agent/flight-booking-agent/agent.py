@@ -5,9 +5,13 @@ from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, SseServerParams
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 import asyncio
+import os
 
-AUDIENCE = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/"
-ENDPOINT = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/sse"
+# AUDIENCE = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/"
+# ENDPOINT = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/sse"
+
+AUDIENCE = os.environ.get("MCP_SERVER_URL")
+ENDPOINT = os.environ.get("MCP_SERVER_URL") + "/sse"
 
 async def get_booking(booking_id: str)-> str:
     """
