@@ -10,8 +10,11 @@ import os
 # AUDIENCE = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/"
 # ENDPOINT = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/sse/"
 
-AUDIENCE = os.environ.get("MCP_SERVER_URL") | "/"
+AUDIENCE = os.environ.get("MCP_SERVER_URL") + "/"
 ENDPOINT = os.environ.get("MCP_SERVER_URL") + "/sse/"
+
+auth_req = google.auth.transport.requests.Request()
+id_token = google.oauth2.id_token.fetch_id_token(auth_req, AUDIENCE)
 
 async def get_booking(booking_id: str)-> str:
     """
@@ -65,12 +68,22 @@ async def list_booking(user_id: str)-> str:
             print(result.contents[0].text)
             return result.contents[0].text
 
-async def get_tools():
-    """Gets tools from the File System MCP Server."""
-    auth_req = google.auth.transport.requests.Request()
-    id_token = google.oauth2.id_token.fetch_id_token(auth_req, AUDIENCE)
+flight_booking_agent = LlmAgent(name = "flight_booking_agent",
+    model = "gemini-2.5-flash-preview-04-17",
+    description = "This agent handles the flight bookings for the user",
+    instruction = """
+        You are agent that handles the flight bookings for the `user_id` user_1.
+        You have access to below set of the tools for performing flight bookings
 
-    tools, exit_stack = await MCPToolset.from_server(
+        - create_booking - Use this tool for booking the flight
+            - Obtain the details like `from_location`, `to_location` and `flight_date` for calling this tool.
+            - Handle the `flight_date` value to convert as string in format 'yyyy-mm-dd HH:MM:SS'
+            - Respond back with the `booking_id` back to the user 
+        - cancel_booking - Use this tool for cancelling a booking based on `booking_id` provided by the user
+        - get_booking - Use this tool for get the booking details for given `booking_id`
+        - list_booking - Use this tool for listing the booking_ids for the user based on `user_id`
+    """,
+    tools = [ MCPToolset(
         connection_params=SseConnectionParams(
             url= ENDPOINT,
             headers={ "Authorization": f"Bearer {id_token}",
@@ -78,38 +91,10 @@ async def get_tools():
             "Accept": "application/json, text/event-stream"
             }
         )
+    ), get_booking, list_booking]
     )
-    print("MCP Toolset created successfully.")
-    return tools, exit_stack
 
-async def create_agent_async():
-    tool_list = []
-    tools, exit_stack = await get_tools()
-    tool_list.extend(tools)
-    tool_list.extend([get_booking, list_booking])
-    print(tool_list)
-
-    flight_booking_agent = LlmAgent(name = "flight_booking_agent",
-        model = "gemini-2.5-flash-preview-04-17",
-        description = "This agent handles the flight bookings for the user",
-        instruction = """
-            You are agent that handles the flight bookings for the `user_id` user_1.
-            You have access to below set of the tools for performing flight bookings
-
-            - create_booking - Use this tool for booking the flight
-                - Obtain the details like `from_location`, `to_location` and `flight_date` for calling this tool.
-                - Handle the `flight_date` value to convert as string in format 'yyyy-mm-dd HH:MM:SS'
-                - Respond back with the `booking_id` back to the user 
-            - cancel_booking - Use this tool for cancelling a booking based on `booking_id` provided by the user
-            - get_booking - Use this tool for get the booking details for given `booking_id`
-            - list_booking - Use this tool for listing the booking_ids for the user based on `user_id`
-        """,
-        tools = tool_list
-        )
-
-    return flight_booking_agent, exit_stack
-
-root_agent = create_agent_async()
+root_agent = flight_booking_agent
 
 """
 Show all my bookings
