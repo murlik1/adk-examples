@@ -1,17 +1,17 @@
 import google.auth.transport.requests
 import google.oauth2.id_token
 from google.adk.agents import LlmAgent
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, SseServerParams
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, SseConnectionParams
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 import asyncio
 import os
 
 # AUDIENCE = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/"
-# ENDPOINT = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/sse"
+# ENDPOINT = "https://mcp-server-flight-booking-service-<replace_project>.us-central1.run.app/sse/"
 
-AUDIENCE = os.environ.get("MCP_SERVER_URL")
-ENDPOINT = os.environ.get("MCP_SERVER_URL") + "/sse"
+AUDIENCE = os.environ.get("MCP_SERVER_URL") | "/"
+ENDPOINT = os.environ.get("MCP_SERVER_URL") + "/sse/"
 
 async def get_booking(booking_id: str)-> str:
     """
@@ -71,7 +71,7 @@ async def get_tools():
     id_token = google.oauth2.id_token.fetch_id_token(auth_req, AUDIENCE)
 
     tools, exit_stack = await MCPToolset.from_server(
-        connection_params=SseServerParams(
+        connection_params=SseConnectionParams(
             url= ENDPOINT,
             headers={ "Authorization": f"Bearer {id_token}",
             "Content-Type": "application/json",

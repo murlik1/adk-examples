@@ -3,8 +3,13 @@ WORKDIR /app
 
 COPY . .
 
-RUN python -m venv venv
-RUN venv/bin/python -m pip install -r requirements.txt
-EXPOSE 8080
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["venv/bin/python", "main.py"]
+RUN adduser --disabled-password --gecos "" myuser && \
+    chown -R myuser:myuser /app
+
+USER myuser
+
+ENV PATH="/home/myuser/.local/bin:$PATH"
+
+CMD ["sh", "-c", "uvicorn main:sse_app --host 0.0.0.0 --port $PORT"]

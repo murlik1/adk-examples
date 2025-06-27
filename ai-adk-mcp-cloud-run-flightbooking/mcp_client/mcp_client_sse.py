@@ -9,7 +9,7 @@ async def run():
     auth_req = google.auth.transport.requests.Request()
     id_token = google.oauth2.id_token.fetch_id_token(auth_req, AUDIENCE)
 
-    async with sse_client(url="https://mcp-server-flight-booking-service-<replace>.us-central1.run.app/sse",
+    async with sse_client(url="https://mcp-server-flight-booking-service-<replace>.us-central1.run.app/sse/",
      headers={"Authorization": f"Bearer {id_token}",
             "Content-Type": "application/json",
             "Accept": "application/json, text/event-stream"
